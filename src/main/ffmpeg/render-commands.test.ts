@@ -148,7 +148,7 @@ describe('transitionArgs', () => {
     expect(args.at(-1)).toBe('T1.mkv')
   })
 
-  it('neige TV : neige et souffle générés, clip entrant sur son dernier quart', () => {
+  it('neige TV : coupes sèches, neige et souffle générés sans aucun fondu', () => {
     const args = transitionArgs({
       tail: 'A-tail.mkv',
       head: 'B-head.mkv',
@@ -160,16 +160,13 @@ describe('transitionArgs', () => {
       draft: false
     })
     const filter = valueAfter(args, '-filter_complex') ?? ''
-    // Aucune source externe : seulement les deux morceaux de clips en entrée.
-    expect(args.filter((a) => a === '-i')).toHaveLength(2)
+    // Aucune entrée : tout est généré.
+    expect(args).not.toContain('-i')
     expect(filter).toContain('noise=c0s=100')
     expect(filter).toContain('cb=128:cr=128')
     expect(filter).toContain('anoisesrc=')
-    // 60 images → fondus de 15 images ; le clip entrant commence à l'image 45.
-    expect(filter).toContain('[1:v]trim=start_frame=45')
-    expect(filter).toContain('offset=0.750000')
-    expect(filter).toContain('amix=inputs=3:normalize=0,atrim=end_sample=48000')
-    expect(filter).not.toContain('acrossfade')
+    expect(filter).toContain('atrim=end_sample=48000')
+    expect(filter).not.toMatch(/fade/)
     expect(valueAfter(args, '-frames:v')).toBe('60')
   })
 })

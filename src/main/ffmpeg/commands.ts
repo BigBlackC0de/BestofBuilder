@@ -321,28 +321,16 @@ export function tvHissSource(durationSec: number): string {
 }
 
 /**
- * Transition « neige TV » : le clip sortant se fond dans la neige (1er quart), neige et souffle
- * seuls, puis le clip entrant réapparaît (dernier quart). Côté son, le clip sortant baisse,
- * le souffle monte puis s'efface pendant que le clip entrant remonte.
- * Le clip entrant n'est montré que sur ses dernières images, pour enchaîner sans saut avec la suite.
+ * Transition « neige TV », façon zapping : coupe sèche vers la neige et le souffle, puis coupe
+ * sèche vers le clip suivant, sans aucun fondu. Les images qui se chevauchent sont entièrement
+ * remplacées par la neige : le clip sortant est coupé net, le clip entrant reprend en pleine action.
  */
 function tvSnowFilter(frames: number, fps: number): string {
   const d = frames / fps
-  const q = Math.max(1, Math.round(frames / 4))
-  const fadeSec = (q / fps).toFixed(6)
-  const lastQuarter = ((frames - q) / fps).toFixed(6)
-  const tb = `settb=1/${fps}`
-  return [
-    `[0:v]setpts=PTS-STARTPTS,${tb}[out]`,
-    `${tvSnowSource(fps, d)},setpts=PTS-STARTPTS,${tb}[snow]`,
-    `[1:v]trim=start_frame=${frames - q},setpts=PTS-STARTPTS,${tb}[in]`,
-    `[out][snow]xfade=transition=fade:duration=${fadeSec}:offset=0[mid]`,
-    `[mid][in]xfade=transition=fade:duration=${fadeSec}:offset=${lastQuarter},format=yuv420p[v]`,
-    `[0:a]afade=t=out:st=0:d=${fadeSec}[aout]`,
-    `${tvHissSource(d)},afade=t=in:st=0:d=${(q / fps / 2).toFixed(6)},afade=t=out:st=${lastQuarter}:d=${fadeSec}[hiss]`,
-    `[1:a]afade=t=in:st=${lastQuarter}:d=${fadeSec}[ain]`,
-    `[aout][hiss][ain]amix=inputs=3:normalize=0,atrim=end_sample=${frames * samplesPerFrame(fps)}[a]`
-  ].join(';')
+  return (
+    `${tvSnowSource(fps, d)}[v];` +
+    `${tvHissSource(d)},atrim=end_sample=${frames * samplesPerFrame(fps)}[a]`
+  )
 }
 
 /** Rend une transition entre la fin d'un élément et le début du suivant. */
@@ -361,10 +349,8 @@ export function transitionArgs(o: TransitionOptions): string[] {
     '-progress',
     'pipe:1',
     '-nostats',
-    '-i',
-    o.tail,
-    '-i',
-    o.head,
+    // La neige est entièrement générée : elle n'utilise pas les morceaux de clips.
+    ...(o.kind === 'tvsnow' ? [] : ['-i', o.tail, '-i', o.head]),
     '-filter_complex',
     filter,
     '-map',

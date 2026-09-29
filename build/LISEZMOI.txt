@@ -1,0 +1,2 @@
+Déposer ici l'icône de l'application : icon.png (PNG 1024 x 1024).
+Le fichier .ico Windows est généré automatiquement par electron-builder.

@@ -1,7 +1,7 @@
 {
   "name": "bestofbuilder",
   "productName": "BestofBuilder",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Monte les best-of de la semaine à partir des clips OBS et Twitch.",
   "repository": "github:BigBlackC0de/BestofBuilder",
   "author": "BestofBuilder",

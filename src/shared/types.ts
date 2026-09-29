@@ -170,6 +170,15 @@ export interface RenderFailure extends UserError {
   logPath: string | null
 }
 
+/** État des mises à jour automatiques (GitHub Releases). */
+export type UpdateStatus =
+  | { state: 'idle' }
+  | { state: 'checking' }
+  | { state: 'up-to-date' }
+  | { state: 'downloading'; version: string; percent: number }
+  | { state: 'ready'; version: string }
+  | { state: 'error'; message: string }
+
 /** Erreur présentable à l'utilisateur : un message clair et une action proposée. */
 export interface UserError {
   message: string

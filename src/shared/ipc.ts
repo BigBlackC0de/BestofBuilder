@@ -10,7 +10,8 @@ import type {
   RenderProgress,
   Result,
   ScanResult,
-  SettingsView
+  SettingsView,
+  UpdateStatus
 } from './types'
 
 /** Noms des canaux IPC (source unique partagée par main et preload). */
@@ -32,7 +33,10 @@ export const IPC = {
   renderProgress: 'render:progress',
   renderShowOutput: 'render:show-output',
   renderOpenLog: 'render:open-log',
-  renderCopyChapters: 'render:copy-chapters'
+  renderCopyChapters: 'render:copy-chapters',
+  updateStatus: 'update:status',
+  updateGetStatus: 'update:get-status',
+  updateInstall: 'update:install'
 } as const
 
 export type RenderResult = { ok: true; data: RenderOutcome } | { ok: false; error: RenderFailure }
@@ -75,5 +79,12 @@ export interface BobApi {
     openLog(): Promise<void>
     /** Copie les chapitres du dernier rendu dans le presse-papiers. */
     copyChapters(): Promise<boolean>
+  }
+  update: {
+    getStatus(): Promise<UpdateStatus>
+    /** S'abonne aux changements d'état. Renvoie la fonction de désabonnement. */
+    onStatus(listener: (status: UpdateStatus) => void): () => void
+    /** Redémarre l'appli pour installer la mise à jour téléchargée (refusé pendant un rendu). */
+    install(): Promise<boolean>
   }
 }

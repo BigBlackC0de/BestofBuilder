@@ -36,6 +36,7 @@ import {
   startRender
 } from './render/pipeline'
 import { getSettings, updateEditableSettings, updateSettings } from './settings'
+import { getUpdateStatus, installUpdate } from './updater'
 
 async function binaryVersion(getPath: () => string): Promise<string | null> {
   try {
@@ -226,6 +227,9 @@ export function registerIpc(): void {
     const path = getLastLogPath()
     if (path) await shell.openPath(path)
   })
+
+  ipcMain.handle(IPC.updateGetStatus, () => getUpdateStatus())
+  ipcMain.handle(IPC.updateInstall, () => installUpdate())
 
   ipcMain.handle(IPC.renderCopyChapters, () => {
     const chapters = getLastChapters()

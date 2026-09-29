@@ -1,5 +1,6 @@
 import { app, Menu, shell, type MenuItemConstructorOptions } from 'electron'
 import { thumbnailDir } from './library/analyze'
+import { checkForUpdatesManually, RELEASES_URL } from './updater'
 
 export function buildMenu(): void {
   const view: MenuItemConstructorOptions[] = [
@@ -18,6 +19,12 @@ export function buildMenu(): void {
     {
       label: 'Aide',
       submenu: [
+        { label: 'Vérifier les mises à jour…', click: () => checkForUpdatesManually() },
+        {
+          label: 'Page du projet (nouveautés, versions)',
+          click: () => void shell.openExternal(RELEASES_URL)
+        },
+        { type: 'separator' },
         {
           label: 'Ouvrir le dossier des journaux',
           click: () => void shell.openPath(app.getPath('logs'))

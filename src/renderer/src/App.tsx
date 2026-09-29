@@ -7,6 +7,7 @@ import { Panel } from './components/Panel'
 import { RenderPanel } from './components/RenderPanel'
 import { SettingsModal } from './components/SettingsModal'
 import { TrimModal } from './components/TrimModal'
+import { UpdateBanner } from './components/UpdateBanner'
 
 /**
  * Relecture du même dossier : on garde la sélection, l'ordre et les découpes des clips déjà
@@ -118,6 +119,8 @@ export function App() {
           ⚙ Réglages
         </button>
       </header>
+
+      <UpdateBanner rendering={rendering} />
 
       {error && (
         <div className="alert" role="alert">

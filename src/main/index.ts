@@ -2,6 +2,7 @@ import { join } from 'node:path'
 import { app, BrowserWindow, dialog, session, shell } from 'electron'
 import { registerIpc } from './ipc'
 import { buildMenu } from './menu'
+import { initUpdater } from './updater'
 import { cancelRender, cleanupStaleRenders, isRendering } from './render/pipeline'
 import { APP_URL, handleAppScheme, handleMediaScheme, registerSchemes } from './protocol'
 
@@ -25,6 +26,8 @@ function createWindow(): void {
     minHeight: 640,
     show: false,
     backgroundColor: '#06070D',
+    // Une fois installée, Windows utilise l'icône de l'exécutable.
+    ...(app.isPackaged ? {} : { icon: join(app.getAppPath(), 'build', 'icon.png') }),
     webPreferences: {
       preload: join(import.meta.dirname, '../preload/index.cjs'),
       contextIsolation: true,
@@ -96,6 +99,7 @@ void app.whenReady().then(() => {
   registerIpc()
   buildMenu()
   createWindow()
+  initUpdater()
 })
 
 app.on('window-all-closed', () => app.quit())

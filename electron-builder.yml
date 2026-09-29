@@ -1,4 +1,4 @@
-﻿appId: app.bestofbuilder
+appId: app.bestofbuilder
 productName: BestofBuilder
 directories:
   buildResources: build
@@ -10,21 +10,32 @@ files:
   # ffprobe-static contient les binaires de toutes les plateformes : on ne garde que Windows x64.
   - '!node_modules/ffprobe-static/bin/{darwin,linux}/**'
   - '!node_modules/ffprobe-static/bin/win32/ia32/**'
-# Les binaires ffmpeg/ffprobe doivent Ãªtre hors de l'archive asar pour Ãªtre exÃ©cutables.
+# Les binaires ffmpeg/ffprobe doivent être hors de l'archive asar pour être exécutables.
 asarUnpack:
   - node_modules/ffmpeg-static/**
   - node_modules/ffprobe-static/**
+# Seules les traductions utiles d'Electron sont gardées (installeur plus léger).
+electronLanguages:
+  - fr
+  - en-US
 win:
+  # L'icône est lue depuis build/icon.png (1024 px) et convertie en .ico automatiquement.
   target:
     - nsis
     - portable
-  # L'icône est lue automatiquement depuis build/icon.png (1024 px) si elle existe.
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: always
   createStartMenuShortcut: true
   shortcutName: BestofBuilder
+  # Pas d'espace dans le nom : les fichiers publiés sur GitHub doivent garder ce nom exact.
+  artifactName: ${productName}-Setup-${version}.${ext}
 portable:
-  artifactName: ${productName}-${version}-portable.exe
-# La publication GitHub Releases sera configurÃ©e au jalon M4.
+  artifactName: ${productName}-${version}-portable.${ext}
+# Mises à jour automatiques : les installeurs sont publiés dans les Releases du dépôt (public).
+publish:
+  provider: github
+  owner: BigBlackC0de
+  repo: BestofBuilder
+  releaseType: release

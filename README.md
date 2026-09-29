@@ -2,7 +2,7 @@
 
 Application Windows qui transforme le dossier de clips de la semaine (replays OBS, clips Twitch) en best-of monté, prêt pour YouTube.
 
-100 % local : aucune donnée ne quitte la machine (hormis, plus tard, la vérification des mises à jour sur GitHub).
+100 % local : aucune donnée ne quitte la machine (hormis la vérification des mises à jour sur GitHub).
 
 ## État d'avancement
 
@@ -11,7 +11,7 @@ Application Windows qui transforme le dossier de clips de la semaine (replays OB
 | M1    | Squelette, DA, choix du dossier, liste des clips (analyse + miniatures) | ✅      |
 | M2    | Sélection, ordre, normalisation, assemblage, rendu avec progression     | ✅      |
 | M3    | Découpe, transitions, intro/outro, filigrane, loudnorm, chapitres       | ✅      |
-| M4    | Installeur, icône, mises à jour automatiques, publication GitHub        | à venir |
+| M4    | Installeur, icône, mises à jour automatiques, publication GitHub        | ✅      |
 | M5    | Bandeau de titre, stinger, export Short                                 | à venir |
 
 ## Utilisation
@@ -61,28 +61,57 @@ npm run dev
 
 La fenêtre s'ouvre ; toute modification de l'interface est rechargée automatiquement.
 
-## Construire l'exécutable Windows
+## Installer l'appli
+
+Télécharge `BestofBuilder-Setup-X.Y.Z.exe` dans les [Releases du projet](https://github.com/BigBlackC0de/BestofBuilder/releases) et lance-le. L'installeur crée un raccourci sur le bureau et dans le menu Démarrer.
+
+Il existe aussi `BestofBuilder-X.Y.Z-portable.exe`, qui se lance sans installation, depuis une clé USB par exemple. **La version portable ne se met pas à jour toute seule.**
+
+### Avertissement Windows SmartScreen
+
+L'appli n'est pas signée numériquement (un certificat coûte plusieurs centaines d'euros par an). Au premier lancement, Windows affiche « Windows a protégé votre ordinateur » :
+
+1. clique sur **Informations complémentaires** ;
+2. puis sur **Exécuter quand même**.
+
+Ça n'arrive qu'une fois par version téléchargée. Les mises à jour automatiques, elles, s'installent sans cet avertissement.
+
+## Mises à jour automatiques
+
+- Quelques secondes après le démarrage, l'appli regarde s'il existe une version plus récente dans les Releases GitHub. C'est sa **seule** connexion à internet.
+- Si oui, elle la télécharge en arrière-plan (bandeau en haut de la fenêtre), puis affiche **Redémarrer pour mettre à jour**. Sinon, elle s'installe toute seule à la fermeture de l'appli.
+- Pendant un rendu, le redémarrage est bloqué pour ne pas perdre le travail en cours.
+- Menu **Aide → Vérifier les mises à jour…** pour vérifier à la main.
+
+## Publier une nouvelle version
+
+Tout se fait depuis le terminal de VS Code, dans le dossier du projet, une fois les modifications commitées :
+
+```
+npm version patch
+git push --follow-tags
+```
+
+- `npm version patch` passe par exemple de 0.4.0 à **0.4.1** (petite correction). Utilise `npm version minor` pour 0.5.0 (nouveautés) ou `npm version major` pour 1.0.0. La commande change le numéro dans `package.json`, crée le commit et le tag `v0.4.1`.
+- `git push --follow-tags` envoie le tout sur GitHub.
+- Le workflow **Publier une version** (onglet **Actions** du dépôt) prend alors le relais pendant environ 10 minutes : il vérifie le code, construit l'installeur et le publie dans une nouvelle Release. Si une étape échoue, la Release n'est pas créée et le détail est dans l'onglet Actions.
+- Les applis déjà installées trouveront la mise à jour à leur prochain démarrage.
+
+Tu peux ensuite modifier la Release sur GitHub pour décrire les nouveautés.
+
+**Jeton GitHub :** aucun à créer. Le workflow utilise le jeton temporaire que GitHub fournit automatiquement à chaque exécution, et l'appli n'en contient aucun. Les mises à jour marchent sans jeton parce que le dépôt est **public**. S'il repassait en privé, elles ne marcheraient plus pour personne : il faudrait alors publier les installeurs dans un second dépôt public.
+
+## Construire l'installeur sur ta machine (sans publier)
 
 ```
 npm run dist
 ```
 
-Les fichiers sont créés dans le dossier `dist/` :
-
-- `BestofBuilder Setup X.Y.Z.exe` : l'installeur (raccourcis bureau et menu Démarrer) ;
-- `BestofBuilder-X.Y.Z-portable.exe` : la version portable, sans installation.
-
-L'installeur pèse environ 150 Mo : ffmpeg et ffprobe sont embarqués, rien d'autre à installer.
-
-> L'appli n'est pas signée : Windows SmartScreen affichera « Windows a protégé votre ordinateur ». Clique sur **Informations complémentaires** puis **Exécuter quand même**. (Détails et procédure de publication complète au jalon M4.)
-
-## Publier une mise à jour
-
-Sera documenté au jalon M4 (tag `vX.Y.Z` → GitHub Actions construit et publie l'installeur).
+Les fichiers sont créés dans `dist/` : l'installeur `BestofBuilder-Setup-X.Y.Z.exe` et la version portable. Rien n'est envoyé sur GitHub.
 
 ## Icône de l'appli
 
-Dépose ton image **PNG 1024 × 1024** ici : `build/icon.png`. electron-builder génère automatiquement l'`.ico` Windows au moment de la construction.
+L'icône vient de `build/icon.svg`, convertie en `build/icon.png` (1024 × 1024) par `npm run icon`. Tu peux aussi déposer directement ta propre image **PNG 1024 × 1024** à la place de `build/icon.png`. Le `.ico` Windows est généré automatiquement à la construction.
 
 ## Où sont mes données ?
 
@@ -120,10 +149,13 @@ src/
 │  ├─ ffmpeg/         chemins des binaires, construction des commandes (testée), exécution
 │  ├─ library/        lecture du dossier, analyse ffprobe, miniatures
 │  ├─ assets.ts       intro, outro, filigrane choisis dans les réglages
+│  ├─ updater.ts      mises à jour automatiques (Releases GitHub)
 │  └─ render/         rendu : préparation, transitions, volume, assemblage, journal
 ├─ preload/           pont minimal et typé exposé à l'interface (window.bob)
 └─ renderer/          interface React (thème néo-rétro)
-build/                ressources de construction (icône)
+build/                icône (icon.svg → icon.png)
+scripts/              outils (génération de l'icône)
+.github/workflows/    vérifications et publication des versions
 ```
 
 Sécurité : `contextIsolation`, `sandbox`, pas de `nodeIntegration`, aucune URL distante, navigation et nouvelles fenêtres bloquées, permissions refusées. L'interface ne manipule jamais de chemins de fichiers : elle n'accède aux vidéos et miniatures que par identifiant, via `bob-media://`.

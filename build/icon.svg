@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0E1522"/>
+      <stop offset="1" stop-color="#06070D"/>
+    </linearGradient>
+    <pattern id="scan" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="3" fill="#FFFFFF" opacity="0.035"/>
+    </pattern>
+    <clipPath id="card">
+      <rect x="40" y="40" width="944" height="944" rx="200"/>
+    </clipPath>
+    <!-- Triangle « lecture » découpé en tranches : des clips assemblés. -->
+    <clipPath id="play">
+      <path d="M392 282 L392 742 L770 512 Z"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#card)">
+    <rect x="40" y="40" width="944" height="944" fill="url(#bg)"/>
+    <rect x="40" y="40" width="944" height="944" fill="url(#scan)"/>
+    <circle cx="512" cy="512" r="400" fill="#5CF2E3" opacity="0.06"/>
+  </g>
+  <rect x="44" y="44" width="936" height="936" rx="196" fill="none" stroke="#2A2D45" stroke-width="8"/>
+
+  <!-- Coins de visée -->
+  <g fill="none" stroke="#5CF2E3" stroke-width="26" stroke-linecap="square">
+    <path d="M210 330 V210 H330"/>
+    <path d="M694 210 H814 V330"/>
+    <path d="M814 694 V814 H694"/>
+    <path d="M330 814 H210 V694"/>
+  </g>
+
+  <!-- Dédoublement rose / cyan façon glitch -->
+  <g transform="translate(-22 0)" opacity="0.9">
+    <g clip-path="url(#play)"><rect x="300" y="250" width="520" height="520" fill="#FF5FB0"/></g>
+  </g>
+  <g transform="translate(22 0)" opacity="0.9">
+    <g clip-path="url(#play)"><rect x="300" y="250" width="520" height="520" fill="#5CF2E3"/></g>
+  </g>
+  <g clip-path="url(#play)">
+    <rect x="300" y="250" width="520" height="118" fill="#E8ECF5"/>
+    <rect x="300" y="386" width="520" height="104" fill="#E8ECF5"/>
+    <rect x="300" y="508" width="520" height="116" fill="#E8ECF5"/>
+    <rect x="300" y="642" width="520" height="140" fill="#E8ECF5"/>
+  </g>
+</svg>

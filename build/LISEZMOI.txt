@@ -1,2 +1,5 @@
-Déposer ici l'icône de l'application : icon.png (PNG 1024 x 1024).
-Le fichier .ico Windows est généré automatiquement par electron-builder.
+Icône de l'application :
+- icon.svg : source de l'icône (modifiable) ;
+- icon.png : version 1024 x 1024 utilisée pour construire l'appli, régénérée par « npm run icon ».
+Pour utiliser ta propre icône, remplace icon.png par une image PNG 1024 x 1024.
+Le fichier .ico Windows est généré automatiquement à la construction.

@@ -1,0 +1,49 @@
+# Publie une nouvelle version : construit l'installeur Windows et le met dans une Release GitHub.
+# Se déclenche quand un tag vX.Y.Z est poussé (voir « Publier une mise à jour » dans le README).
+name: Publier une version
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+# Le jeton fourni automatiquement par GitHub suffit pour publier dans ce dépôt :
+# aucun jeton personnel à créer, rien n'est jamais embarqué dans l'appli.
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Vérifier que le tag correspond à la version du package.json
+        shell: bash
+        run: |
+          version="v$(node -p "require('./package.json').version")"
+          if [ "$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Le tag $GITHUB_REF_NAME ne correspond pas à la version $version du package.json. Utilise « npm version » pour créer le tag."
+            exit 1
+          fi
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Vérifications (lint, tests, typage)
+        run: |
+          npm run lint
+          npm test
+          npm run typecheck
+
+      - name: Compiler l'appli
+        run: npx electron-vite build
+
+      - name: Construire et publier l'installeur
+        run: npx electron-builder --win --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

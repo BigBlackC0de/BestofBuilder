@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import { IPC, type BobApi } from '@shared/ipc'
-import type { RenderProgress } from '@shared/types'
+import type { RenderProgress, UpdateStatus } from '@shared/types'
 
 const api: BobApi = {
   app: {
@@ -32,6 +32,15 @@ const api: BobApi = {
     showOutput: () => ipcRenderer.invoke(IPC.renderShowOutput),
     openLog: () => ipcRenderer.invoke(IPC.renderOpenLog),
     copyChapters: () => ipcRenderer.invoke(IPC.renderCopyChapters)
+  },
+  update: {
+    getStatus: () => ipcRenderer.invoke(IPC.updateGetStatus),
+    onStatus: (listener) => {
+      const handler = (_event: IpcRendererEvent, status: UpdateStatus) => listener(status)
+      ipcRenderer.on(IPC.updateStatus, handler)
+      return () => ipcRenderer.removeListener(IPC.updateStatus, handler)
+    },
+    install: () => ipcRenderer.invoke(IPC.updateInstall)
   }
 }
 

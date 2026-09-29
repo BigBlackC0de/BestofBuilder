@@ -298,13 +298,62 @@ export interface TransitionOptions {
   draft: boolean
 }
 
-/** Rend une transition (xfade + acrossfade) entre la fin d'un élément et le début du suivant. */
+/**
+ * Neige d'une télé analogique, générée (aucun fichier externe) : bruit sur la luminosité seule,
+ * calculé en 480×360 puis agrandi sans lissage pour un gros grain étiré, contraste fort, bandes
+ * horizontales qui défilent et léger vignettage.
+ */
+export function tvSnowSource(fps: number, durationSec: number): string {
+  return (
+    `color=c=0x808080:s=480x360:r=${fps}:d=${durationSec.toFixed(6)},format=yuv420p,` +
+    'noise=c0s=100:c0f=t+u:all_seed=7,eq=contrast=2.4:brightness=0.1,' +
+    `geq=lum='clip(lum(X,Y)*(0.86+0.14*sin((Y+T*420)/11)),0,255)':cb=128:cr=128,vignette=PI/6,` +
+    `scale=${OUTPUT_WIDTH}:${OUTPUT_HEIGHT}:flags=neighbor,format=yuv420p,setsar=1`
+  )
+}
+
+/** Souffle « pssshhh » : bruit blanc filtré comme un haut-parleur de télé. */
+export function tvHissSource(durationSec: number): string {
+  return (
+    `anoisesrc=r=${AUDIO_RATE}:c=white:a=0.22:d=${durationSec.toFixed(6)},` +
+    'highpass=f=250,lowpass=f=7000,aformat=sample_fmts=fltp:channel_layouts=stereo'
+  )
+}
+
+/**
+ * Transition « neige TV » : le clip sortant se fond dans la neige (1er quart), neige et souffle
+ * seuls, puis le clip entrant réapparaît (dernier quart). Côté son, le clip sortant baisse,
+ * le souffle monte puis s'efface pendant que le clip entrant remonte.
+ * Le clip entrant n'est montré que sur ses dernières images, pour enchaîner sans saut avec la suite.
+ */
+function tvSnowFilter(frames: number, fps: number): string {
+  const d = frames / fps
+  const q = Math.max(1, Math.round(frames / 4))
+  const fadeSec = (q / fps).toFixed(6)
+  const lastQuarter = ((frames - q) / fps).toFixed(6)
+  const tb = `settb=1/${fps}`
+  return [
+    `[0:v]setpts=PTS-STARTPTS,${tb}[out]`,
+    `${tvSnowSource(fps, d)},setpts=PTS-STARTPTS,${tb}[snow]`,
+    `[1:v]trim=start_frame=${frames - q},setpts=PTS-STARTPTS,${tb}[in]`,
+    `[out][snow]xfade=transition=fade:duration=${fadeSec}:offset=0[mid]`,
+    `[mid][in]xfade=transition=fade:duration=${fadeSec}:offset=${lastQuarter},format=yuv420p[v]`,
+    `[0:a]afade=t=out:st=0:d=${fadeSec}[aout]`,
+    `${tvHissSource(d)},afade=t=in:st=0:d=${(q / fps / 2).toFixed(6)},afade=t=out:st=${lastQuarter}:d=${fadeSec}[hiss]`,
+    `[1:a]afade=t=in:st=${lastQuarter}:d=${fadeSec}[ain]`,
+    `[aout][hiss][ain]amix=inputs=3:normalize=0,atrim=end_sample=${frames * samplesPerFrame(fps)}[a]`
+  ].join(';')
+}
+
+/** Rend une transition entre la fin d'un élément et le début du suivant. */
 export function transitionArgs(o: TransitionOptions): string[] {
   const duration = (o.frames / o.fps).toFixed(6)
   const samples = o.frames * samplesPerFrame(o.fps)
   const filter =
-    `[0:v][1:v]xfade=transition=${o.kind}:duration=${duration}:offset=0,format=yuv420p[v];` +
-    `[0:a][1:a]acrossfade=ns=${samples}[a]`
+    o.kind === 'tvsnow'
+      ? tvSnowFilter(o.frames, o.fps)
+      : `[0:v][1:v]xfade=transition=${o.kind}:duration=${duration}:offset=0,format=yuv420p[v];` +
+        `[0:a][1:a]acrossfade=ns=${samples}[a]`
   return [
     '-hide_banner',
     '-nostdin',

@@ -19,7 +19,7 @@ Application Windows qui transforme le dossier de clips de la semaine (replays OB
 1. **Choisir le dossier** des clips de la semaine. Ils sont listés par date de création.
 2. Décoche les clips à écarter, réordonne-les en les **glissant par la poignée** ⋮⋮ (ou au clavier : Tab jusqu'à la poignée, Espace, flèches, Espace).
 3. **✂ Éditer** un clip ouvre **DECOUPE.EXE** : place-toi dans la vidéo puis **Entrée ici (I)** / **Sortie ici (O)** (réglage fin ±0,1 s), **Lire la sélection** pour vérifier, et donne-lui un **titre** (il servira pour les chapitres YouTube).
-4. **⚙ Réglages** ouvre **REGLAGES.EXE** : transition (fondu, pixelisation, flou horizontal, glissement ou aucune) et sa durée, intro et outro, filigrane PNG (taille, opacité), normalisation du volume. Tout est mémorisé.
+4. **⚙ Réglages** ouvre **REGLAGES.EXE** : transition (fondu, **neige TV avec souffle**, pixelisation, flou horizontal, glissement ou aucune) et sa durée, intro et outro, filigrane PNG (taille, opacité), normalisation du volume. Tout est mémorisé.
 5. Dans **RENDU.EXE**, choisis le préréglage, vérifie le nom du fichier et le dossier de sortie, puis clique sur **Générer**.
 6. À la fin : **Ouvrir le dossier**, **Copier les chapitres** (à coller dans la description YouTube) ou **Voir le journal**.
 

@@ -24,10 +24,11 @@ export interface Settings {
   loudnorm: boolean
 }
 
-export type TransitionKind = 'fade' | 'pixelize' | 'hblur' | 'slideleft' | 'none'
+export type TransitionKind = 'fade' | 'tvsnow' | 'pixelize' | 'hblur' | 'slideleft' | 'none'
 
 export const TRANSITIONS: readonly { id: TransitionKind; label: string }[] = [
   { id: 'fade', label: 'Fondu' },
+  { id: 'tvsnow', label: 'Neige TV (avec souffle)' },
   { id: 'pixelize', label: 'Pixelisation' },
   { id: 'hblur', label: 'Flou horizontal' },
   { id: 'slideleft', label: 'Glissement vers la gauche' },
